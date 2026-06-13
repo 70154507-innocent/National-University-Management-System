@@ -3,6 +3,7 @@
 -- ============================================================
 
 -- FEATURE 1: Create New Table (DDL - CREATE)
+
 CREATE TABLE Hostel (
     hostel_id INT PRIMARY KEY AUTO_INCREMENT,
     hostel_name VARCHAR(100) NOT NULL,
@@ -12,7 +13,6 @@ INSERT INTO Hostel (hostel_name, capacity) VALUES ('Jinnah Hall', 150);
 
 SELECT '--- OUTPUT FOR FEATURE 1: CREATE TABLE (HOSTEL) ---' AS Message;
 SELECT * FROM Hostel;
-
 
 -- FEATURE 2: Insert Data (DML - INSERT)
 INSERT INTO Students (reg_no, full_name, email, phone, dept_id, semester, status)
@@ -38,20 +38,31 @@ SELECT s.student_id, s.full_name, d.dept_name
 FROM Students s
 INNER JOIN Departments d ON s.dept_id = d.dept_id;
 
-
 -- FEATURE 6: Update Data (DML - UPDATE)
 UPDATE Students SET semester = 4 WHERE reg_no = 'NU-001';
 
 SELECT '--- OUTPUT FOR FEATURE 6: UPDATE DATA (AHSAN SEMESTER CHANGED TO 4) ---' AS Message;
 SELECT student_id, full_name, semester FROM Students WHERE reg_no = 'NU-001';
 
-
 -- FEATURE 7: Delete Data (DML - DELETE)
+SELECT '--- OUTPUT FOR FEATURE 7: DELETE DATA (INACTIVE STUDENTS REMOVED) ---' AS Message;
+-- Disable foreign key checks temporarily to force the delete
+SET FOREIGN_KEY_CHECKS = 0;
+
 DELETE FROM Students WHERE status = 'Inactive';
 
-SELECT '--- OUTPUT FOR FEATURE 7: DELETE DATA (INACTIVE STUDENTS REMOVED) ---' AS Message;
-SELECT * FROM Students;
+-- Clean up leftover records in child tables
+DELETE FROM Enrollments WHERE student_id NOT IN (SELECT student_id FROM Students);
+DELETE FROM Attendance WHERE student_id NOT IN (SELECT student_id FROM Students);
+DELETE FROM Results WHERE student_id NOT IN (SELECT student_id FROM Students);
+DELETE FROM Fee_Records WHERE student_id NOT IN (SELECT student_id FROM Students);
 
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Final View
+SELECT '--- FINAL VERIFICATION: INACTIVE STUDENTS REMOVED ---' AS Message;
+SELECT * FROM Students;
 
 -- FEATURE 8: Aggregate Query (COUNT + GROUP BY)
 SELECT '--- OUTPUT FOR FEATURE 8: AGGREGATE QUERY (STUDENTS COUNT PER DEPT) ---' AS Message;
@@ -60,14 +71,12 @@ FROM Departments d
 LEFT JOIN Students s ON d.dept_id = s.dept_id
 GROUP BY d.dept_name;
 
-
 -- FEATURE 9: Modify Table Structure (DDL - ALTER)
 ALTER TABLE Students ADD cgpa DECIMAL(3,2);
 
 SELECT '--- OUTPUT FOR FEATURE 9: ALTER TABLE (NEW CGPA COLUMN ADDED) ---' AS Message;
 -- Kuch columns select kar rahe hain taake cgpa ka naya column end mein saaf dikhe
 SELECT student_id, full_name, semester, cgpa FROM Students;
-
 
 -- FEATURE 10: Grant Permissions (DCL - GRANT)
 -- Note: Online compilers mein agar GRANT command block kare toh bas is akhiri section ko delete kar dena.
